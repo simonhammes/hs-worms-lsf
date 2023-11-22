@@ -25,8 +25,8 @@ class Album {
   final int albumId;
   final int id;
   final String title;
-  final String url;
-  final String thumbnailUrl;
+  final Uri url;
+  final Uri thumbnailUrl;
 
   const Album({
     required this.albumId,
@@ -41,8 +41,8 @@ class Album {
       albumId: json['albumId'],
       id: json['id'],
       title: json['title'],
-      url: json['url'],
-      thumbnailUrl: json['thumbnailUrl'],
+      url: Uri.parse(json['url']),
+      thumbnailUrl: Uri.parse(json['thumbnailUrl']),
     );
   }
 }
@@ -84,7 +84,7 @@ class _MyAppState extends State<MyApp> {
                 return Column(
                   children: [
                     CachedNetworkImage(
-                      imageUrl: snapshot.data!.url,
+                      imageUrl: snapshot.data!.url.toString(),
                       progressIndicatorBuilder: (context, url, downloadProgress) =>
                           CircularProgressIndicator(value: downloadProgress.progress),
                       errorWidget: (context, url, error) => const Icon(Icons.error),
