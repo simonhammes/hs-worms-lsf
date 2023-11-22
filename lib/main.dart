@@ -6,7 +6,8 @@ import 'package:html/parser.dart';
 import 'package:http/http.dart' as http;
 
 Future<http.Response> fetchDocument() async {
-  final url = Uri.parse("https://lsf.hs-worms.de/qisserver/rds?state=currentLectures&type=1&next=CurrentLectures.vm&nextdir=ressourcenManager&navigationPosition=lectures%2CcanceledLectures&breadcrumb=canceledLectures&topitem=lectures&subitem=canceledLectures&asi=");
+  final url = Uri.parse(
+      "https://lsf.hs-worms.de/qisserver/rds?state=currentLectures&type=1&next=CurrentLectures.vm&nextdir=ressourcenManager&navigationPosition=lectures%2CcanceledLectures&breadcrumb=canceledLectures&topitem=lectures&subitem=canceledLectures&asi=");
   final response = await http.get(url);
 
   if (response.statusCode != HttpStatus.ok) {
@@ -55,13 +56,17 @@ List<Course> parseDocument(String html) {
     final room = cells[6].text.trim();
     final comment = cells[8].text.trim();
 
-    courses.add(Course(start: start, finish: finish, number: number, title: title, building: building, room: room, comment: comment));
+    final course = Course(
+      start: start,
+      finish: finish,
+      number: number,
+      title: title,
+      building: building,
+      room: room,
+      comment: comment,
+    );
 
-    /*
-    var employee = new Employee(
-        name: cells[0].text,
-        department: cells[1].text,
-        salary: parseDouble(cells[2].text));*/
+    courses.add(course);
   }
 
   return courses;
@@ -81,7 +86,15 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> {
   late Future<http.Response> futureResponse;
 
-  static const headers = ["Start", "Finish", "Number", "Title", "Building", "Room", "Comment"];
+  static const headers = [
+    "Start",
+    "Finish",
+    "Number",
+    "Title",
+    "Building",
+    "Room",
+    "Comment",
+  ];
 
   @override
   void initState() {
@@ -114,30 +127,31 @@ class _MyAppState extends State<MyApp> {
               }
 
               final courses = parseDocument(snapshot.data!.body);
+
               return DataTable(
-                  columns: [
-                    for (final header in headers)
-                      DataColumn(
-                        // TODO: Try without Expanded
-                        label: Expanded(
-                          child: Text(header),
-                        ),
-                      )
-                  ],
-                  rows: [
-                    for (final course in courses)
-                      DataRow(
-                        cells: [
-                          DataCell(Text(course.start)),
-                          DataCell(Text(course.finish)),
-                          DataCell(Text(course.number)),
-                          DataCell(Text(course.title)),
-                          DataCell(Text(course.building)),
-                          DataCell(Text(course.room)),
-                          DataCell(Text(course.comment)),
-                        ],
-                      )
-                  ],
+                columns: [
+                  for (final header in headers)
+                    DataColumn(
+                      // TODO: Try without Expanded
+                      label: Expanded(
+                        child: Text(header),
+                      ),
+                    )
+                ],
+                rows: [
+                  for (final course in courses)
+                    DataRow(
+                      cells: [
+                        DataCell(Text(course.start)),
+                        DataCell(Text(course.finish)),
+                        DataCell(Text(course.number)),
+                        DataCell(Text(course.title)),
+                        DataCell(Text(course.building)),
+                        DataCell(Text(course.room)),
+                        DataCell(Text(course.comment)),
+                      ],
+                    )
+                ],
               );
             },
           ),
