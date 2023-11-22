@@ -44,8 +44,8 @@ List<Course> parseDocument(String html) {
   // TODO: Access tr's directly
 
   final rows = document.querySelectorAll("tr");
-  for (final row in rows) {
-    // TODO: Skip first row (header)
+  // Use skip(1) to skip over table header
+  for (final row in rows.skip(1)) {
     final cells = row.children;
     final start = cells[0].text.trim();
     final finish = cells[1].text.trim();
