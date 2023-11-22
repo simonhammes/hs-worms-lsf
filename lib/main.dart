@@ -1,53 +1,75 @@
 import 'dart:async';
-import 'dart:convert';
+import 'dart:io';
 
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:html/parser.dart';
 import 'package:http/http.dart' as http;
 
-Future<Album> fetchAlbum() async {
-  final response = await http
-      .get(Uri.parse('https://jsonplaceholder.typicode.com/albums/1/photos'));
+Future<http.Response> fetchDocument() async {
+  final url = Uri.parse("https://lsf.hs-worms.de/qisserver/rds?state=currentLectures&type=1&next=CurrentLectures.vm&nextdir=ressourcenManager&navigationPosition=lectures%2CcanceledLectures&breadcrumb=canceledLectures&topitem=lectures&subitem=canceledLectures&asi=");
+  final response = await http.get(url);
 
-  if (response.statusCode == 200) {
-    // If the server did return a 200 OK response, then parse the JSON.
-    return (json.decode(response.body) as List)
-        .map((a) => Album.fromJson(a))
-        .toList()
-        .first;
-  } else {
-    // If the server did not return a 200 OK response, then throw an exception.
-    throw Exception('Failed to load album');
+  if (response.statusCode != HttpStatus.ok) {
+    throw Exception('Failed to fetch courses');
   }
+
+  return response;
 }
 
-class Album {
-  final int albumId;
-  final int id;
+class Course {
+  // TODO: Fix data types
+  final String start;
+  final String finish;
+  final String number;
   final String title;
-  final Uri url;
-  final Uri thumbnailUrl;
+  final String building;
+  final String room;
+  final String comment;
 
-  const Album({
-    required this.albumId,
-    required this.id,
+  const Course({
+    required this.start,
+    required this.finish,
+    required this.number,
     required this.title,
-    required this.url,
-    required this.thumbnailUrl,
+    required this.building,
+    required this.room,
+    required this.comment,
   });
-
-  factory Album.fromJson(Map<String, dynamic> json) {
-    return Album(
-      albumId: json['albumId'],
-      id: json['id'],
-      title: json['title'],
-      url: Uri.parse(json['url']),
-      thumbnailUrl: Uri.parse(json['thumbnailUrl']),
-    );
-  }
 }
 
-void main() => runApp(const MyApp());
+List<Course> parseDocument(String html) {
+  final courses = <Course>[];
+  final document = parse(html);
+  // TODO: Error handling
+  // TODO: Access tr's directly
+
+  final rows = document.querySelectorAll("tr");
+  for (final row in rows) {
+    // TODO: Skip first row (header)
+    final cells = row.children;
+    final start = cells[0].text.trim();
+    final finish = cells[1].text.trim();
+    final number = cells[2].text.trim();
+    final title = cells[3].text.trim();
+    final building = cells[4].text.trim();
+    final room = cells[6].text.trim();
+    final comment = cells[8].text.trim();
+
+    courses.add(Course(start: start, finish: finish, number: number, title: title, building: building, room: room, comment: comment));
+
+    /*
+    var employee = new Employee(
+        name: cells[0].text,
+        department: cells[1].text,
+        salary: parseDouble(cells[2].text));*/
+  }
+
+  return courses;
+}
+
+void main() {
+  runApp(const MyApp());
+}
 
 class MyApp extends StatefulWidget {
   const MyApp({super.key});
@@ -57,53 +79,66 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  late Future<Album> futureAlbum;
+  late Future<http.Response> futureResponse;
+
+  static const headers = ["Start", "Finish", "Number", "Title", "Building", "Room", "Comment"];
 
   @override
   void initState() {
     super.initState();
-    futureAlbum = fetchAlbum();
+    futureResponse = fetchDocument();
   }
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Fetch Data Example',
+      title: 'LSF',
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
       home: Scaffold(
         appBar: AppBar(
-          title: const Text('Fetch Data Example'),
+          title: const Text('LSF'),
         ),
         body: Center(
-          child: FutureBuilder<Album>(
-            future: futureAlbum,
+          child: FutureBuilder<http.Response>(
+            future: futureResponse,
             builder: (context, snapshot) {
-              if (snapshot.hasData) {
-                return Column(
-                  children: [
-                    CachedNetworkImage(
-                      imageUrl: snapshot.data!.url.toString(),
-                      progressIndicatorBuilder:
-                          (context, url, downloadProgress) =>
-                              CircularProgressIndicator(
-                                  value: downloadProgress.progress),
-                      errorWidget: (context, url, error) =>
-                          const Icon(Icons.error),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.all(20),
-                      child: Text(snapshot.data!.title),
-                    ),
-                  ],
-                );
-              } else if (snapshot.hasError) {
+              if (snapshot.hasError) {
                 return Text('${snapshot.error}');
               }
 
-              // By default, show a loading spinner.
-              return const CircularProgressIndicator();
+              if (!snapshot.hasData) {
+                // Show a loading spinner
+                return const CircularProgressIndicator();
+              }
+
+              final courses = parseDocument(snapshot.data!.body);
+              return DataTable(
+                  columns: [
+                    for (final header in headers)
+                      DataColumn(
+                        // TODO: Try without Expanded
+                        label: Expanded(
+                          child: Text(header),
+                        ),
+                      )
+                  ],
+                  rows: [
+                    for (final course in courses)
+                      DataRow(
+                        cells: [
+                          DataCell(Text(course.start)),
+                          DataCell(Text(course.finish)),
+                          DataCell(Text(course.number)),
+                          DataCell(Text(course.title)),
+                          DataCell(Text(course.building)),
+                          DataCell(Text(course.room)),
+                          DataCell(Text(course.comment)),
+                        ],
+                      )
+                  ],
+              );
             },
           ),
         ),
