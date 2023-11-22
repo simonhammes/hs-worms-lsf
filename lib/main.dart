@@ -85,9 +85,12 @@ class _MyAppState extends State<MyApp> {
                   children: [
                     CachedNetworkImage(
                       imageUrl: snapshot.data!.url.toString(),
-                      progressIndicatorBuilder: (context, url, downloadProgress) =>
-                          CircularProgressIndicator(value: downloadProgress.progress),
-                      errorWidget: (context, url, error) => const Icon(Icons.error),
+                      progressIndicatorBuilder:
+                          (context, url, downloadProgress) =>
+                              CircularProgressIndicator(
+                                  value: downloadProgress.progress),
+                      errorWidget: (context, url, error) =>
+                          const Icon(Icons.error),
                     ),
                     Padding(
                       padding: const EdgeInsets.all(20),
