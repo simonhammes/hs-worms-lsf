@@ -170,3 +170,37 @@ class _CourseDataTable extends StatelessWidget {
     );
   }
 }
+
+class _CourseList extends StatelessWidget {
+  static const headers = [
+    "Start",
+    "Finish",
+    "Number",
+    "Title",
+    "Building",
+    "Room",
+    "Comment",
+  ];
+
+  final List<Course> courses;
+
+  const _CourseList(this.courses);
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView.separated(
+      itemCount: courses.length,
+      itemBuilder: (context, index) {
+        final course = courses[index];
+        return ListTile(
+          title: Text(course.title),
+          subtitle: Text('${course.room}\n${course.comment}'),
+          // Allow subtitle to contain 2 lines of text
+          isThreeLine: true,
+          leading: Text(course.start),
+        );
+      },
+      separatorBuilder: (context, index) => const Divider(),
+    );
+  }
+}
