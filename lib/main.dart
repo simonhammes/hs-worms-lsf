@@ -53,7 +53,7 @@ List<Course> parseDocument(String html) {
     final number = cells[2].text.trim();
     final title = cells[3].text.trim();
     final building = cells[4].text.trim();
-    final room = cells[6].text.trim();
+    final room = cells[5].text.trim();
     final comment = cells[8].text.trim();
 
     final course = Course(
