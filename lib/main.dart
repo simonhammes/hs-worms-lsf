@@ -86,16 +86,6 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> {
   late Future<http.Response> futureResponse;
 
-  static const headers = [
-    "Start",
-    "Finish",
-    "Number",
-    "Title",
-    "Building",
-    "Room",
-    "Comment",
-  ];
-
   @override
   void initState() {
     super.initState();
@@ -127,36 +117,56 @@ class _MyAppState extends State<MyApp> {
               }
 
               final courses = parseDocument(snapshot.data!.body);
-
-              return DataTable(
-                columns: [
-                  for (final header in headers)
-                    DataColumn(
-                      // TODO: Try without Expanded
-                      label: Expanded(
-                        child: Text(header),
-                      ),
-                    )
-                ],
-                rows: [
-                  for (final course in courses)
-                    DataRow(
-                      cells: [
-                        DataCell(Text(course.start)),
-                        DataCell(Text(course.finish)),
-                        DataCell(Text(course.number)),
-                        DataCell(Text(course.title)),
-                        DataCell(Text(course.building)),
-                        DataCell(Text(course.room)),
-                        DataCell(Text(course.comment)),
-                      ],
-                    )
-                ],
-              );
+              return _CourseDataTable(courses);
             },
           ),
         ),
       ),
+    );
+  }
+}
+
+class _CourseDataTable extends StatelessWidget {
+  static const headers = [
+    "Start",
+    "Finish",
+    "Number",
+    "Title",
+    "Building",
+    "Room",
+    "Comment",
+  ];
+
+  final List<Course> courses;
+
+  const _CourseDataTable(this.courses);
+
+  @override
+  Widget build(BuildContext context) {
+    return DataTable(
+      columns: [
+        for (final header in headers)
+          DataColumn(
+            // TODO: Try without Expanded
+            label: Expanded(
+              child: Text(header),
+            ),
+          )
+      ],
+      rows: [
+        for (final course in courses)
+          DataRow(
+            cells: [
+              DataCell(Text(course.start)),
+              DataCell(Text(course.finish)),
+              DataCell(Text(course.number)),
+              DataCell(Text(course.title)),
+              DataCell(Text(course.building)),
+              DataCell(Text(course.room)),
+              DataCell(Text(course.comment)),
+            ],
+          )
+      ],
     );
   }
 }
