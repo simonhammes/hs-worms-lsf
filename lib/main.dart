@@ -85,6 +85,7 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   late Future<http.Response> futureResponse;
+  ViewType _viewType = ViewType.list;
 
   @override
   void initState() {
@@ -102,6 +103,19 @@ class _MyAppState extends State<MyApp> {
       home: Scaffold(
         appBar: AppBar(
           title: const Text('LSF'),
+          actions: [
+            IconButton(
+              icon: determineIcon(),
+              onPressed: () {
+                setState(() {
+                  _viewType = switch (_viewType) {
+                    ViewType.list => ViewType.table,
+                    ViewType.table => ViewType.list,
+                  };
+                });
+              },
+            ),
+          ],
         ),
         body: Center(
           child: FutureBuilder<http.Response>(
@@ -117,14 +131,29 @@ class _MyAppState extends State<MyApp> {
               }
 
               final courses = parseDocument(snapshot.data!.body);
-              return _CourseDataTable(courses);
+
+              return switch (_viewType) {
+                ViewType.list => _CourseList(courses),
+                ViewType.table => _CourseDataTable(courses),
+              };
             },
           ),
         ),
       ),
     );
   }
+
+  Icon determineIcon() {
+    switch (_viewType) {
+      case ViewType.list:
+        return const Icon(Icons.view_list);
+      case ViewType.table:
+        return const Icon(Icons.view_column_outlined);
+    }
+  }
 }
+
+enum ViewType { list, table }
 
 class _CourseDataTable extends StatelessWidget {
   static const headers = [
