@@ -201,16 +201,6 @@ class _CourseDataTable extends StatelessWidget {
 }
 
 class _CourseList extends StatelessWidget {
-  static const headers = [
-    "Start",
-    "Finish",
-    "Number",
-    "Title",
-    "Building",
-    "Room",
-    "Comment",
-  ];
-
   final List<Course> courses;
 
   const _CourseList(this.courses);
