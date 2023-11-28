@@ -14,8 +14,6 @@ Future<http.Response> fetchDocument() async {
     throw Exception('Failed to fetch courses');
   }
 
-  print("Hello World");
-
   return response;
 }
 
