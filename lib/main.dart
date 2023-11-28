@@ -140,20 +140,10 @@ class _MyAppState extends State<MyApp> {
                 onRefresh: () {
                   return Future(() { setState(() {}); });
                 },
-                child: ListView.separated(
-                  itemCount: courses.length,
-                  itemBuilder: (context, index) {
-                    final course = courses[index];
-                    return ListTile(
-                      title: Text(course.title),
-                      subtitle: Text('${course.room}\n${course.comment}'),
-                      // Allow subtitle to contain 2 lines of text
-                      isThreeLine: true,
-                      leading: Text(course.start),
-                    );
-                  },
-                  separatorBuilder: (context, index) => const Divider(),
-                ),
+                child: switch (_viewType) {
+                  ViewType.table => _CourseDataTable(courses),
+                  ViewType.list => _CourseList(courses),
+                },
               );
             },
           ),
