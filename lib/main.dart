@@ -14,6 +14,8 @@ Future<http.Response> fetchDocument() async {
     throw Exception('Failed to fetch courses');
   }
 
+  print("Hello World");
+
   return response;
 }
 
@@ -95,6 +97,7 @@ class _MyAppState extends State<MyApp> {
 
   @override
   Widget build(BuildContext context) {
+    futureResponse = fetchDocument();
     return MaterialApp(
       title: 'LSF',
       theme: ThemeData(
@@ -132,10 +135,26 @@ class _MyAppState extends State<MyApp> {
 
               final courses = parseDocument(snapshot.data!.body);
 
-              return switch (_viewType) {
-                ViewType.list => _CourseList(courses),
-                ViewType.table => _CourseDataTable(courses),
-              };
+              return RefreshIndicator(
+                // key: _refreshIndicatorKey,
+                onRefresh: () {
+                  return Future(() { setState(() {}); });
+                },
+                child: ListView.separated(
+                  itemCount: courses.length,
+                  itemBuilder: (context, index) {
+                    final course = courses[index];
+                    return ListTile(
+                      title: Text(course.title),
+                      subtitle: Text('${course.room}\n${course.comment}'),
+                      // Allow subtitle to contain 2 lines of text
+                      isThreeLine: true,
+                      leading: Text(course.start),
+                    );
+                  },
+                  separatorBuilder: (context, index) => const Divider(),
+                ),
+              );
             },
           ),
         ),
