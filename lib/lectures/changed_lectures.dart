@@ -4,37 +4,67 @@ import 'package:flutter/material.dart';
 import 'package:html/parser.dart';
 import 'package:http/http.dart' as http;
 
-class ChangedLectures extends StatelessWidget {
+class ChangedLectures extends StatefulWidget {
   const ChangedLectures({super.key});
 
   @override
+  State<StatefulWidget> createState() => _ChangedLecturesState();
+}
+
+class _ChangedLecturesState extends State<ChangedLectures> {
+  DateTime _date = DateTime.now();
+
+  @override
   Widget build(BuildContext context) {
-    final future = fetchDocument();
+    final future = fetchDocument(_date);
 
-    return FutureBuilder<http.Response>(
-      future: future,
-      builder: (context, snapshot) {
-        if (snapshot.hasError) {
-          return Text('${snapshot.error}');
-        }
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('LSF'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.calendar_month),
+            onPressed: () async {
+              final date = await showDatePicker(
+                context: context,
+                firstDate: DateTime(2023, 1, 1),
+                lastDate: DateTime(2024, 12, 31),
+              );
 
-        if (!snapshot.hasData) {
-          // Show a loading spinner
-          return const CircularProgressIndicator();
-        }
+              if (date != null) {
+                setState(() {
+                  _date = date;
+                });
+              }
+            },
+          ),
+        ],
+      ),
+      body: FutureBuilder<http.Response>(
+        future: future,
+        builder: (context, snapshot) {
+          if (snapshot.hasError) {
+            return Text('${snapshot.error}');
+          }
 
-        final courses = parseDocument(snapshot.data!.body);
+          if (!snapshot.hasData) {
+            // Show a loading spinner
+            return const CircularProgressIndicator();
+          }
 
-        return RefreshIndicator(
-          // key: _refreshIndicatorKey,
-          onRefresh: () {
-            // TODO
-            // return Future(() { setState(() {}); });
-            return Future.delayed(const Duration(seconds: 1));
-          },
-          child: _CourseList(courses),
-        );
-      },
+          final courses = parseDocument(snapshot.data!.body);
+
+          return RefreshIndicator(
+            // key: _refreshIndicatorKey,
+            onRefresh: () {
+              // TODO
+              // return Future(() { setState(() {}); });
+              return Future.delayed(const Duration(seconds: 1));
+            },
+            child: _CourseList(courses),
+          );
+        },
+      ),
     );
   }
 }
@@ -63,9 +93,11 @@ class _CourseList extends StatelessWidget {
   }
 }
 
-Future<http.Response> fetchDocument() async {
+Future<http.Response> fetchDocument(DateTime date) async {
   final url = Uri.parse(
-      "https://lsf.hs-worms.de/qisserver/rds?state=currentLectures&type=1&next=CurrentLectures.vm&nextdir=ressourcenManager&navigationPosition=lectures%2CcanceledLectures&breadcrumb=canceledLectures&topitem=lectures&subitem=canceledLectures&asi=");
+      "https://lsf.hs-worms.de/qisserver/rds?state=currentLectures&type=1&next=CurrentLectures.vm&nextdir=ressourcenManager&navigationPosition=lectures%2CcanceledLectures&breadcrumb=canceledLectures&topitem=lectures&subitem=canceledLectures&asi=&HISCalendar_Date=${date.day}.${date.month}.${date.year}",
+  );
+
   final response = await http.get(url);
 
   if (response.statusCode != HttpStatus.ok) {

@@ -76,30 +76,33 @@ class AllLectures extends StatelessWidget {
   Widget build(BuildContext context) {
     final future = _fetchDocument();
 
-    return FutureBuilder<http.Response>(
-      future: future,
-      builder: (context, snapshot) {
-        if (snapshot.hasError) {
-          return Text('${snapshot.error}');
-        }
+    return Scaffold(
+      appBar: AppBar(title: const Text('LSF')),
+      body: FutureBuilder<http.Response>(
+        future: future,
+        builder: (context, snapshot) {
+          if (snapshot.hasError) {
+            return Text('${snapshot.error}');
+          }
 
-        if (!snapshot.hasData) {
-          // Show a loading spinner
-          return const CircularProgressIndicator();
-        }
+          if (!snapshot.hasData) {
+            // Show a loading spinner
+            return const CircularProgressIndicator();
+          }
 
-        final courses = parseDocument(snapshot.data!.body);
+          final courses = parseDocument(snapshot.data!.body);
 
-        return RefreshIndicator(
-          // key: _refreshIndicatorKey,
-          onRefresh: () {
-            // TODO
-            // return Future(() { setState(() {}); });
-            return Future.delayed(const Duration(seconds: 1));
-          },
-          child: _CourseList(courses),
-        );
-      },
+          return RefreshIndicator(
+            // key: _refreshIndicatorKey,
+            onRefresh: () {
+              // TODO
+              // return Future(() { setState(() {}); });
+              return Future.delayed(const Duration(seconds: 1));
+            },
+            child: _CourseList(courses),
+          );
+        },
+      ),
     );
   }
 }

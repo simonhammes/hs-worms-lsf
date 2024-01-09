@@ -23,7 +23,7 @@ class _AppViewState extends State<AppView> {
       title: 'LSF',
       debugShowCheckedModeBanner: false,
       home: Scaffold(
-        appBar: AppBar(title: const Text('LSF')),
+        // appBar: AppBar(title: const Text('LSF')),
         body: IndexedStack(
           index: _selectedIndex,
           children: _widgetOptions,
